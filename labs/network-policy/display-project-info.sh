@@ -61,7 +61,7 @@ function display_network_policies {
 
     if count_resources networkpolicies ; then
         echo -e "\n"
-        oc get networkpolicies -o custom-columns='POLICY NAME:.metadata.name, POD-SELECTOR:.spec.podSelector.0, INGRESS:.spec.ingress'
+        oc get networkpolicies
     fi
 }
 export -f display_network_policies
