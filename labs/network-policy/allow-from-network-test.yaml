@@ -1,0 +1,22 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-from-network-test
+  namespace: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      deployment: hello
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8080
+      from:
+        - podSelector:
+            matchLabels:
+              deployment: sample-app
+          namespaceSelector:
+            matchLabels:
+              name: network-test
+  policyTypes:
+    - Ingress

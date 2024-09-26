@@ -1,0 +1,38 @@
+# log in to your cluster as a cluser-admin user.
+
+# Get the default cluster domain name:
+$ set OC_DOMAIN_NAME="$(oc -n openshift-ingress-operator get ingresscontroller/default -o jsonpath='{.status.domain}{"\n"}')"
+$ echo "${OC_DOMAIN_NAME}"
+apps.openshift.nyx.lab.local
+
+# Change to the lab's working directory, e.g. "chapter_5/network_review" for the networking lab
+# and create the certs diretcory.
+cd chapter_5/network_review && mkdir certs
+
+# Run the following command to create a private key
+$ openssl genrsa -out ./certs/training.key 2048
+
+# Run the following command to generate a CSR for the private key.
+$ openssl req -new \
+-key certs/training.key \
+-out certs/training.csr \
+-subj "/C=GB/ST=Surrey/L=Surbiton/O=Estafet Ltd/OU=Training/CN=apps-crc.testing"
+-addext "subjectAltName = DNS:<route host name>"
+
+# The DO280 GitHub repository is in the DO280 directory. Set the TRAINING_CA_DIR environment variable to
+# the absolute path to that diretcory, e.g.:
+TRAINING_CA_DIR=$(readlink -e ../../DO280/training-CA/)
+
+# Run the following command to generate a certificate from the CSR
+$ openssl x509 \
+-copy_extensions copy \
+-ext subjectAltName \
+-req \
+-in certs/training.csr \
+-CA ${TRAINING_CA_DIR}/training-CA.crt \
+-CAkey ${TRAINING_CA_DIR}/training-CA.key \
+-CAcreateserial \
+-passin file:${TRAINING_CA_DIR}/ca_password.txt \
+-out certs/training.crt \
+-days 1650 \
+-sha256
